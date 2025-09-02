@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .predict-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .predict-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 18px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .result.success {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+
+        .result.error {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+            box-shadow: 0 10px 30px rgba(244, 67, 54, 0.3);
+        }
+
+        .price-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+
+        .car-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="car-icon">🚗</div>
+        <h1>Car Price Predictor</h1>
+        
+        <form id="carForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="company">Company Name</label>
+                    <select id="company" name="company" required>
+                        <option value="">Select Company</option>
+                        <option value="FERRARI">Ferrari</option>
+                        <option value="ROLLS ROYCE">Rolls Royce</option>
+                        <option value="Ford">Ford</option>
+                        <option value="MERCEDES">Mercedes</option>
+                        <option value="AUDI">Audi</option>
+                        <option value="LAMBORGHINI">Lamborghini</option>
+                        <option value="Porsche">Porsche</option>
+                        <option value="Chevrolet">Chevrolet</option>
+                        <option value="Jaguar Land Rover">Jaguar Land Rover</option>
+                        <option value="Cadillac">Cadillac</option>
+                        <option value="TOYOTA">Toyota</option>
+                        <option value="Kia">Kia</option>
+                        <option value="Nissan">Nissan</option>
+                        <option value="BMW">BMW</option>
+                        <option value="Honda">Honda</option>
+                        <option value="Hyundai">Hyundai</option>
+                        <option value="Volkswagen">Volkswagen</option>
+                        <option value="Tesla">Tesla</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="car_name">Car Name</label>
+                    <input type="text" id="car_name" name="car_name" placeholder="e.g., 911 Targa 4" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="engine">Engine Type</label>
+                    <input type="text" id="engine" name="engine" placeholder="e.g., V8, V6, Electric" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fuel_type">Fuel Type</label>
+                    <select id="fuel_type" name="fuel_type" required>
+                        <option value="">Select Fuel Type</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Electric">Electric</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Plug-in Hybrid">Plug-in Hybrid</option>
+                        <option value="Gas / Hybrid">Gas / Hybrid</option>
+                        <option value="Petrol/Diesel">Petrol/Diesel</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="horsepower">Horsepower (HP)</label>
+                    <input type="number" id="horsepower" name="horsepower" placeholder="e.g., 379" min="50" max="2000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="seats">Number of Seats</label>
+                    <select id="seats" name="seats" required>
+                        <option value="">Select Seats</option>
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="torque">Torque (Nm)</label>
+                    <input type="number" id="torque" name="torque" placeholder="e.g., 450" min="100" max="1500" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cc">Engine Displacement (CC)</label>
+                    <input type="number" id="cc" name="cc" placeholder="e.g., 2981" min="800" max="8000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="top_speed">Top Speed (km/h)</label>
+                    <input type="number" id="top_speed" name="top_speed" placeholder="e.g., 289" min="120" max="400" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="acceleration">0-100 km/h (seconds)</label>
+                    <input type="number" id="acceleration" name="acceleration" step="0.1" placeholder="e.g., 4.4" min="2.0" max="15.0" required>
+                </div>
+            </div>
+
+            <button type="submit" class="predict-btn">Predict Car Price</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Predicting price...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('carForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const form = this;
+            
+            // Show loading
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (data.error) {
+                    result.className = 'result error';
+                    result.innerHTML = `<strong>Error:</strong> ${data.error}`;
+                } else {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h3>Predicted Price</h3>
+                        <div class="price-display">${data.predicted_price}</div>
+                        <p>For ${data.car_details['Company Names']} ${data.car_details['Cars Names']}</p>
+                    `;
+                }
+                
+                result.style.display = 'block';
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                result.className = 'result error';
+                result.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                result.style.display = 'block';
+            }
+        });
+
+        // Add some dynamic interactions
+        document.getElementById('company').addEventListener('change', function() {
+            const carNameInput = document.getElementById('car_name');
+            if (this.value) {
+                carNameInput.focus();
+            }
+        });
+
+        // Add input validation feedback
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.validity.valid) {
+                    this.style.borderColor = '#4CAF50';
+                } else {
+                    this.style.borderColor = '#f44336';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
